@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine.UI;
+using System.IO;
 
 public class NetworkClient : MonoBehaviour
 {
@@ -26,6 +27,7 @@ public class NetworkClient : MonoBehaviour
 
     GameObject playerGO;
     NetInfo playerInfo;
+    string logPath = "Log.txt";
 
     [SerializeField]
     List<GameObject> AllPlayersGO = new List<GameObject>();
@@ -35,6 +37,9 @@ public class NetworkClient : MonoBehaviour
     public Text P2Diff;
     public Text P3Diff;
     public Text NumOfGamesText;
+
+    public GameObject OnlineText;
+    public GameObject OfflineText;
     int NumOfGames = 1;
     
     void Start ()
@@ -78,6 +83,9 @@ public class NetworkClient : MonoBehaviour
         //SpawnPlayer();
         InvokeRepeating("HandShake", 0.0f, 2.0f);
         //InvokeRepeating("UpdateStats", 0.0f, 1.0f/30.0f);
+
+        OnlineText.SetActive(true);
+        OfflineText.SetActive(false);
     }
 
     string LocalIPAddress()
@@ -193,11 +201,6 @@ public class NetworkClient : MonoBehaviour
             case Commands.GAME_RESULT:
                 GameEndMsg geMsg = JsonUtility.FromJson<GameEndMsg>(recMsg);
 
-                Debug.Log("The winner is: " + geMsg.winner.user_id);
-                Debug.Log(geMsg.p1.user_id + " new points: " + geMsg.p1.points);
-                Debug.Log(geMsg.p2.user_id + " new points: " + geMsg.p2.points);
-                Debug.Log(geMsg.p3.user_id + " new points: " + geMsg.p3.points);
-
                 P1Diff.text = (int.Parse(geMsg.p1.points) - int.Parse(clientScript.AllPlayers[0].points)).ToString();
                 P2Diff.text = (int.Parse(geMsg.p2.points) - int.Parse(clientScript.AllPlayers[1].points)).ToString();
                 P3Diff.text = (int.Parse(geMsg.p3.points) - int.Parse(clientScript.AllPlayers[2].points)).ToString();
@@ -205,6 +208,8 @@ public class NetworkClient : MonoBehaviour
                 clientScript.AllPlayers[0] = geMsg.p1;
                 clientScript.AllPlayers[1] = geMsg.p2;
                 clientScript.AllPlayers[2] = geMsg.p3;
+
+                File.WriteAllText(logPath, geMsg.LogData);
             break;
 
             case Commands.PLAYER_DC:
@@ -226,6 +231,8 @@ public class NetworkClient : MonoBehaviour
     void OnDisconnect(){
         Debug.Log("Client got disconnected from server");
         m_Connection = default(NetworkConnection);
+        OnlineText.SetActive(false);
+        OfflineText.SetActive(true);
     }
 
     public void OnDestroy()

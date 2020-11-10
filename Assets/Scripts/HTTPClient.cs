@@ -52,8 +52,8 @@ public class HTTPClient : MonoBehaviour
 
             if(!hasPlayer(p))
             {
+                p.joinTime = System.DateTime.Now.ToString();
                 AllPlayers.Add(p);
-                
             }
             else
             {

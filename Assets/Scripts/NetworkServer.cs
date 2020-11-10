@@ -9,18 +9,19 @@ using System.Collections.Generic;
 using UnityEngine.Rendering;
 using UnityEditor;
 using System.IO;
+using System.Security.Cryptography;
 
 public class NetworkServer : MonoBehaviour
 {
     public NetworkDriver m_Driver;
     public ushort serverPort;
     private NativeList<NetworkConnection> m_Connections;
+    string logPath = "Log.txt";
 
     List<PlayerSpawnMsg> AllSpawnMsg = new List<PlayerSpawnMsg>();
 
     void WriteToLog(string data)
     {
-        string logPath = "Log.txt";
         if(!File.Exists(logPath))
         {
             File.WriteAllText(logPath, "=========================================\nServer Game Log:\n");
@@ -153,15 +154,15 @@ public class NetworkServer : MonoBehaviour
                 GameStartMsg gsMsg = JsonUtility.FromJson<GameStartMsg>(recMsg);
 
                 // Log
-                WriteToLog(gsMsg.p1.user_id + " has joined the match.");
-                WriteToLog(gsMsg.p2.user_id + " has joined the match.");
-                WriteToLog(gsMsg.p3.user_id + " has joined the match.");
+                WriteToLog(gsMsg.p1.user_id + " has joined the match. - " + gsMsg.p1.joinTime);
+                WriteToLog(gsMsg.p2.user_id + " has joined the match. - " + gsMsg.p1.joinTime);
+                WriteToLog(gsMsg.p3.user_id + " has joined the match. - " + gsMsg.p1.joinTime);
                 int result = UnityEngine.Random.Range(1, 4);
                 Player winner = new Player();
 
                 // Log
                 WriteToLog("Game started.");
-                WriteToLog("Result: ");
+                WriteToLog("RESULT: ");
 
                 int p1Points = int.Parse(gsMsg.p1.points);
                 int p2Points = int.Parse(gsMsg.p2.points);
@@ -221,6 +222,7 @@ public class NetworkServer : MonoBehaviour
                     m.p2 = gsMsg.p2;
                     m.p3 = gsMsg.p3;
                     m.winner = winner;
+                    m.LogData = File.ReadAllText(logPath);
                     SendToClient(JsonUtility.ToJson(m), c);
                 }
 

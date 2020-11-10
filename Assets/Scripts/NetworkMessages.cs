@@ -79,6 +79,7 @@ namespace NetworkMessages
         public string skill;
         public string points;
         public string rank;
+        public string joinTime;
     }
 
     [System.Serializable]
@@ -100,6 +101,7 @@ namespace NetworkMessages
         public Player p1;
         public Player p2;
         public Player p3;
+        public string LogData;
         public GameEndMsg()
         {      // Constructor
             cmd = Commands.GAME_RESULT;
